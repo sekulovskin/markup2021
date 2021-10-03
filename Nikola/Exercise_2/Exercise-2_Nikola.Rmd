@@ -1,0 +1,113 @@
+---
+title: 'Exercise 2: Rejection sampling'
+author: "Nikola Sekulovski"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+# Introduction
+
+In this exercise I will try to illustrate how *rejection sampling* works, using the `AR` package.
+Rejection sampling is the underlying way with which we obtain random values from specific probability distributions when using regular random generation functions such as `rnorm`, `runif`, etc. The interested reader is refereed to this [YouTube video](https://www.youtube.com/watch?v=kYWHfgkRc9s&t=491s&ab_channel=BenLambert) by [Ben Lambert](https://www.youtube.com/channel/UC3tFZR3eL1bDY8CqZDOQh-w) for more details.
+
+
+# Getting started
+
+First we load the required package(s).
+```{r, warning=FALSE}
+library(AR)
+```
+
+
+# Illustration using the `AR` package:
+
+Set the number of simulations that we will use to 3000 throughout the different examples.
+```{r}
+nsim <- 3000
+```
+## Example 1: Sampling a `standard normal` from a `standard normal` proposal.
+Here we want to sample from (approximate) a `standard normal distribution` $x_i \sim N(\mu = 0, \sigma = 1)$, using the same *proposal* distribution ($y_i$). I am using this example to illustrate that if we sample from the same distribution i.e., if we use a so-called *proposal* distribution of the same form as the *target* distribution then we would have a *Rejection ratio* equal to zero.
+```{r, fig.cap= "Accepted (green) vs. Rejected (red) values"}
+set.seed(123)
+sim_1 = AR.Sim(n = nsim,
+               f_X = function(y){dnorm(y, mean = 0, sd = 1, log = FALSE)},
+               Y.dist = "norm", Y.dist.par = c(0,1),
+               Rej.Num = TRUE,
+               Rej.Rate = TRUE,
+               Acc.Rate = FALSE
+)
+
+```
+As we can clearly see, both from the the output and the graph, all generated values fall within the specified distribution. This is due to sampling from the a proposal distrubution of the same form as the target distribution, and hence the *rejection ratio* is zero.
+
+ 
+## Example 2: Sampling an `exponential` from a `uniform` proposal.
+
+In this second illustration I am going to repeat the example given by the [above mentioned video](https://www.youtube.com/watch?v=kYWHfgkRc9s&t=491s&ab_channel=BenLambert).
+Basically, we try to approximate a $x_i \sim Exp(1)$ by sampling from a $y_i\sim U(0,8)$ proposal.
+```{r, fig.cap= "Accepted (green) vs. Rejected (red) values"}
+set.seed(123)
+sim_2 = AR.Sim(n = nsim,
+               f_X = function(y){dexp(y, rate = 1, log = FALSE)},
+               Y.dist = "unif", Y.dist.par = c(0,8),
+               Rej.Num = TRUE,
+               Rej.Rate = TRUE,
+               Acc.Rate = FALSE
+)
+
+```
+We can clearly see that the *rejection rate* is very high in this example (0.87), and also the graph is very similar to the one presented in the video.
+
+# Conclusion
+*Rejection sampling* is one of the most basic algorithms used to sample from a particular probability distribution. As it is clearly illustrated above, it is not very efficient when we are sampling from a *proposal* distribution that is very different from the *target* distribution and vice versa. However, asymptotically, it is always guaranteed that an approximation of the *target* distribution will be reached, the only open question is the efficiency.
+
+# Random seed
+
+If we try to repeat one of the examples above using a different random seed, then we will find that the exact values drawn will differ from seed to seed:
+
+```{r, fig.show='hide'}
+set.seed(789)
+sim_3 = AR.Sim(n = nsim,
+               f_X = function(y){dnorm(y, mean = 0, sd = 1, log = FALSE)},
+               Y.dist = "norm", Y.dist.par = c(0,1),
+               Rej.Num = TRUE,
+               Rej.Rate = TRUE,
+               Acc.Rate = FALSE
+)
+```
+```{r}
+compare_1 <- data.frame(sim_1, sim_3)
+
+compare_1[1:10, ]
+```
+
+And if we repeat the simulation with the same random seed, we will obtain exactly the *same* values.
+
+```{r, fig.show='hide'}
+set.seed(789)
+sim_4 = AR.Sim(n = nsim,
+               f_X = function(y){dnorm(y, mean = 0, sd = 1, log = FALSE)},
+               Y.dist = "norm", Y.dist.par = c(0,1),
+               Rej.Num = TRUE,
+               Rej.Rate = TRUE,
+               Acc.Rate = FALSE
+)
+```
+
+```{r}
+compare_2 <- data.frame(sim_3, sim_4)
+
+compare_2[1:10, ]
+```
+Voilà!
+
+
+END OF DOCUMENT
+
+
+```{r}
+sessionInfo()
+```
