@@ -1,0 +1,243 @@
+---
+title: "**Prior Sensitivity of Null Hypothesis Bayesian Testing in the context of Two-level Models**"
+author: "**Nikola Sekulovski**"
+output:
+  ioslides_presentation:
+    logo: uu_logo.png
+    widescreen: true
+    smaller: true
+bibliography: ["refs_pres.bib"]
+csl: apa-no-doi-no-issue.csl
+link-citations: FALSE
+---
+
+```{r packages, include=FALSE}
+library(knitr)    # For knitting document and include_graphics function
+library(ggplot2)  # For plotting
+library(png)      # For grabbing the dimensions of png files
+library(DT)       # for interactive tables
+library(foreign)  #for loading data
+library(gtsummary)#for nice tables
+library(lme4)     #for fitting multlevel models
+library(jtools)   #for a nice summary of a lmer object
+library(xtable)
+```
+
+
+## Introduction
+
+- **N**ull **H**ypothesis **S**ignificance **T**esting [@cohen1994earth];
+
+- **N**ull **H**ypothesis **B**ayesian **T**esting [@tendeiro2019review];
+
+- Multilevel (Two-level) Models [@hox2017multilevel];
+
+- Prior sensitivity [@hoijtink2021prior];
+
+- A predecessor paper that only "sets the stage" for the Master's Thesis.
+
+```{r meme1, out.width = "50%", fig.align = 'center', echo=FALSE, cache=TRUE}
+include_graphics("meme1.jpg")
+```
+
+## Bayes Factor
+
+ - The **Bayes Factor** [@kass1995bayes] is defined as the ratio of two marginal likelihoods. 
+ 
+ - @tendeiro2019review define the marginal likelihood as: "*...weighted average of the likelihood over the observed data, where the weights are provided by the (within) priors*".
+ 
+$$
+\begin{aligned}
+ BF_{0,1} = \frac{P(D|H_0)}{P(D|H_1)} = \frac{\int P(D|\theta_{H_0}, H_0) P(\theta|H_0) d\theta_{H_0}}{\int P(D|\theta_{H_1}, H_1) P(\theta|H_1) d\theta_{H_1}}\ where, \\
+\frac{P(H_0|D)}{P(H_1|D)} = BF_{0,1} * \frac{P(H_0)}{P(H_1)}.
+\end{aligned}
+$$
+ 
+ - **Conclusion:** The prior distribution influences the marginal likelihood and consequently the value of the BF (when testing *null* hypotheses).
+
+
+```{r meme2, out.width = "16%", fig.align = 'center', echo=FALSE, cache=TRUE}
+include_graphics("meme2.jpg")
+```
+ 
+
+## Approximated Adjusted Fractional Bayes Factor
+
+$$
+\begin{aligned}
+AAFBF_{0u} = \frac{f_0}{c_0} = \frac{\int_{\theta \in \Theta_0}\mathcal{N}(\boldsymbol{\hat{\theta}},\boldsymbol{\hat{\Sigma_{\theta}}})d\theta}{\int_{\theta \in \Theta_0}\mathcal{N}(0,\boldsymbol{\hat{\Sigma_{\theta}}}/b)d\theta}\
+where,\ b = \frac{J}{N}.
+\end{aligned}
+$$
+ 
+ - $N$ represents the sample size;
+ 
+ - $J$ by *default* denotes the number of independent constraints in a hypothesis; 
+ 
+ - $\boldsymbol{\hat{\theta}}$ represents the vector of estimated parameters (usually obtained by using some form of MLE) and $\boldsymbol{\hat{\Sigma_{\theta}}}$ represents it's respective covariance matrix.
+ 
+ - The AAFBF is defined as the ratio of the *fit* ($f_0$) and *comlexity* ($c_0$) of a hypothesis against the *uconstrained* hypothesis.
+ 
+ - When testing *null* hypotheses **fit** represents the density of the *posterior* distribution supported by the hypothesis at hand; and the **complexity** represents the density of the **prior** distribution supported by the hypothesis at hand [@hoijtink2019tutorial].
+ 
+## Software
+
+ - The `R` package `bain` computes AAFBF's [@bain].
+ 
+ - `Wrapper function` programmed specifically for the aims of these papers with which one can test hypotheses about the **fixed** effects of two-level models, using `bain`.
+ 
+```{r wrapper, wrapper, eval=FALSE}
+library(lme4) #for fitting multilevel models
+library(bain) #the wrapper function does not work without loading bain
+source("wrapper_function.R") # load the wrapper function
+
+x <- lmer(y ~ x1 + x2 + (x1 | factor), REML = FALSE, data = dat) #fit a two-level model
+
+mlm_bain_std(x, hypotheses, fraction, standardize, type.of.stand, seed) #use the wrapper function
+```
+ 
+ - Two additional questions while programming the function:
+    
+    - Standardization (within group, overall)?
+    
+    - Sample size (level 1 obs, level 2 obs, effective sample size)?
+ 
+# Sensitivity Analysis
+
+## 
+
+### **The Data**
+
+ - `Tutorial` data set [@R2MLwiN].
+ - 4059 students within 65 schools.
+ 
+```{r data, echo=FALSE, cache=TRUE, warning=FALSE, message=FALSE}
+dat <- read.spss("exam.sav", to.data.frame = TRUE)
+dat <- dat [, -2] #get rid of the "student" variable
+datatable(dat, options = list(pageLength = 2))
+```
+
+
+**Descriptive statistics:**
+
+```{r descriptives, echo=FALSE, cache=TRUE}
+dat <- dat[, -1] #exclude school
+tbl_summary(dat)
+```
+
+
+##
+
+### <span style="color:white"> .....</span> **Model Specification:**
+
+<div style="float: left; width: 50%;">
+\
+
+$Exam\;score_{ij} = \gamma_{00} + \gamma_{10}LRT\;score_{ij}+$
+
+$\gamma_{01}AvgLRT_{j} + u_{1j}LRT\;score_{ij} + u_{0j} + e_{ij}.$
+
+
+\
+
+
+And
+$\boldsymbol{U}\sim \mathcal{N}(\boldsymbol{\mu}, \boldsymbol{\Sigma}),$
+$e_{ij} \sim \mathcal{N}(0, \sigma^2_e).$
+
+
+
+\
+
+\
+
+Where:
+$\boldsymbol{U} = \{u_{1j}, u_{0j}\},$
+
+$\boldsymbol{\mu} =\begin{pmatrix}0 \\0 \;\end{pmatrix},$
+$\boldsymbol{\Sigma} =\begin{pmatrix}\sigma^2_{u1} & \sigma^2_{u1,u0} \\\sigma^2_{u1,u0} &\sigma^2_{u0}\end{pmatrix}$.
+
+
+
+</div>
+<div style="float: right; width: 50%;">
+
+### <span style="color:white"> ................... </span> **Model Fit:**
+```{r the model, echo=FALSE, cache=TRUE, warning=FALSE, message=FALSE}
+dat <- read.spss("exam.sav", to.data.frame = TRUE)
+x <- lmer(Examscore ~ 1 + LRTscore + AvsLRT + (LRTscore | School), 
+          REML = F, data = dat)
+summ(x)
+```
+
+</div>
+
+## Sensitivity
+
+<div style="float: left; width: 50%;">
+
+### **Hypotheses:**
+
+$H_{0_1}:\gamma_{10} = \gamma_{01} = 0$; 
+
+$H_{0_2}: \gamma_{10} = \gamma_{01}$;
+
+$H_{i}: \gamma_{10} >0$.
+
+
+### **Procedure:**
+
+First use the *default* value for `fraction = 1` 
+  (i.e., $1*b$). Where $b = \frac{2}{65}=0.03$.
+
+Iteratively change the value of `fraction` to `2, 3, 4`, 
+ respectively.
+
+Compare the resulting values for *complexity* and $BF_{.u}$
+
+</div>
+<div style="float: right; width: 50%;">
+
+### **Results**
+```{r plots, out.width = "94%", cache=TRUE, echo=FALSE, fig.cap= "The BF's of the null hypothesis (a) and informative hypothesis (b) for different values of *b*"}
+BF_o <- c(0.35, 0.25, 0.20, 0.17)
+BF_i <- rep(4.21, 4)
+ax <- c(1,2,3,4)
+
+par(mfrow = c(1, 2)) 
+plot(BF_o, type = "l",  xaxt = "n", xlab = "times b", yaxt = "n", ylab = "BF", main = "a")
+axis(1, at = 1:4)
+axis(2, at = BF_o)
+plot(BF_i, type = "l", xaxt = "n", yaxt = "n", xlab = "times b", ylab = "BF", main = "b")
+axis(1, at = 1:4)
+axis(2, at = BF_i)
+```
+
+</div>
+## Discussion
+
+In the **Master's Thesis** the following issues will be adressed:
+
+ - Calculating a *reference* value for *J* (and thus for *b*) for Two-level Models, based on the work by @hoijtink2021prior (in which this has been done for Linear Regression, ANVOCA and the Welch Test).
+ 
+ - A new method for calculating the *effective sample size* in two-level models containing random slopes.
+ 
+     - Comparison between this method and other approaches (such as the regular *ICC-based* effective sample size; number of level 1 observations or number of level 2 observations).
+
+ - A discussion on different methods for (data) standardization.
+ 
+ - A (small) study that tests the impact of different combinations of these approaches on the resulting BF's (calculated using the derived reference value for *J*).
+ 
+```{r meme3, out.width = "22%", fig.align = 'center', echo=FALSE, cache=TRUE}
+include_graphics("meme3.jpg")
+```
+ 
+## References
+
+
+<style>
+slides > slide { overflow: scroll; }
+slides > slide:not(.nobackground):after {
+  content: '';
+}
+</style>
