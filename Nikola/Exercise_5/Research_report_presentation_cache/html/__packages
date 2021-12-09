@@ -1,0 +1,11 @@
+base
+knitr
+ggplot2
+png
+DT
+foreign
+gtsummary
+Matrix
+lme4
+jtools
+xtable

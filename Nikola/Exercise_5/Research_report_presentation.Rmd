@@ -218,7 +218,7 @@ axis(2, at = BF_i)
 
 In the **Master's Thesis** the following issues will be adressed:
 
- - Calculating a *reference* value for *J* (and thus for *b*) for Two-level Models, based on the work by @hoijtink2021prior (in which this has been done for Linear Regression, ANVOCA and the Welch Test).
+ - Calculating a *reference* value for *J* (and thus for *b*) for Two-level Models, based on the work by @hoijtink2021prior (in which this has been done for Linear Regression, ANCOVA and the Welch Test).
  
  - A new method for calculating the *effective sample size* in two-level models containing random slopes.
  
@@ -226,7 +226,7 @@ In the **Master's Thesis** the following issues will be adressed:
 
  - A discussion on different methods for (data) standardization.
  
- - A (small) study that tests the impact of different combinations of these approaches on the resulting BF's (calculated using the derived reference value for *J*).
+ - A simulation study that tests the impact of different combinations of these approaches on the resulting BF's (calculated using the derived reference value for *J*).
  
 ```{r meme3, out.width = "22%", fig.align = 'center', echo=FALSE, cache=TRUE}
 include_graphics("meme3.jpg")
