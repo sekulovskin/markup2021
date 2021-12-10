@@ -91,17 +91,20 @@ library(lme4) #for fitting multilevel models
 library(bain) #the wrapper function does not work without loading bain
 source("wrapper_function.R") # load the wrapper function
 
-x <- lmer(y ~ x1 + x2 + (x1 | factor), REML = FALSE, data = dat) #fit a two-level model
+model<- lmer(y ~ x1 + x2 + (x1 | factor), REML = FALSE, data = dat) #fit a two-level model
 
-mlm_bain_std(x, hypotheses, fraction, standardize, type.of.stand, seed) #use the wrapper function
+hypotheses <- "x1=x2=0; x1=x2; x1>0 & x2>0" #define the hypotheses 
+
+bain_2lmer(model, hypotheses, fraction = 1, 
+           standardize = TRUE, N = "level_2", seed = 123) #use the wrapper function
 ```
  
- - Two additional questions while programming the function:
+**Two additional questions while programming the function**:
     
-    - Standardization (within group, overall)?
+  - Standardization (within group, overall)?
     
-    - Sample size (level 1 obs, level 2 obs, effective sample size)?
- 
+  - Sample size (level 1 obs, level 2 obs, effective sample size)?
+  
 # Sensitivity Analysis
 
 ## 
