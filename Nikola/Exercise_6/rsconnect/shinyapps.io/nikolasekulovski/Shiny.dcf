@@ -1,0 +1,14 @@
+name: Shiny
+title: Shiny
+username:
+account: nikolasekulovski
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 5363646
+bundleId: 5402183
+url: https://nikolasekulovski.shinyapps.io/Shiny/
+when: 1640200772.20773
+lastSyncTime: 1640200772.20773
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: Shiny.R|Shiny.Rmd
